@@ -4,11 +4,14 @@ import java.util.HashSet;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.newdawn.slick.util.pathfinding.AStarPathFinder;
+
 public class GameUnit extends GameEntity {	
 	public static int SIZE = 20;
-	protected int ATTACK_RANGE = 50;
+	protected int ATTACK_RANGE = 30;
 	protected int CHASE_RANGE = 200;
 	protected int ATTACK_COOLDOWN = 20;
+	protected int ATTACK_OPACITY = 100;
 	protected final int ALLY_SAFE_RANGE = 200;
 
 	protected int MAX_HEALTH = 100;
@@ -35,6 +38,7 @@ public class GameUnit extends GameEntity {
 	private boolean safe;
 	protected int health;
 	
+	private int attack_fade;
 	protected int attack_cooldown = 0;
 	
 	public GameUnit(Faction faction) {
@@ -81,6 +85,8 @@ public class GameUnit extends GameEntity {
 		if(!hasTarget()) {
 			return;
 		}
+		//AStarPathFinder pathFinder = new AStarPathFinder(map, max_search_dist, false, new ClosestHeuristic());
+
 		if(Math.abs(targetY-y) < 20) {
 			if(targetY-y > 0) vely++;
 			else if(targetY-y < 0) vely--;
@@ -108,6 +114,7 @@ public class GameUnit extends GameEntity {
 	
 	public void attack(GameUnit e) {
 		if(attack_cooldown <= 0) {
+			attack_fade = ATTACK_OPACITY;
 			e.health -= 5;
 			attack_cooldown = ATTACK_COOLDOWN;
 		}
@@ -127,7 +134,7 @@ public class GameUnit extends GameEntity {
 		if(faction == GameUnit.Faction.ENEMY) {
 			MAX_SPEED = 10;
 			speed = 2;
-			if(inRange(player, CHASE_RANGE)) {
+			if(player.alive && inRange(player, CHASE_RANGE)) {
 				setTarget(player.x, player.y);
 				if(inRange(player, ATTACK_RANGE)) {
 					attack(player);
@@ -152,6 +159,8 @@ public class GameUnit extends GameEntity {
 		// check health
 		if(health <= 0) {
 			this.alive = false;
+			velx = 0;
+			vely = 0;
 		}
 		
 		// update velocity
@@ -170,9 +179,17 @@ public class GameUnit extends GameEntity {
 		
 		// make next move
 		makeMove();
+		
+		attack_fade -= 10;
+		attack_fade = Math.max(0, attack_fade);
 	}
 	
 	public void draw(Graphics2D g2d, float delta) {
+		if(attack_fade > 0) {
+			g2d.setColor(new Color(255, 100, 0, attack_fade));
+			g2d.fillOval(screen_x - ATTACK_RANGE*3/4, screen_y - ATTACK_RANGE*3/4, ATTACK_RANGE*2, ATTACK_RANGE*2);
+		}
+		
 		if(faction == Faction.PLAYER) {
 			g2d.setColor(Color.green);
 		} else if(faction == Faction.ALLY){

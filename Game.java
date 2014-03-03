@@ -140,20 +140,27 @@ public class Game extends JPanel implements Runnable {
 		keyboard.update();
 
 		// Handle input
-		if(keyboard.keyPressed(KeyEvent.VK_W)) {
-			player.move(Direction.NORTH);
-		}
-		if(keyboard.keyPressed(KeyEvent.VK_A)) {
-			player.move(Direction.WEST);
-		}
-		if(keyboard.keyPressed(KeyEvent.VK_S)) {
-			player.move(Direction.SOUTH);
-		}
-		if(keyboard.keyPressed(KeyEvent.VK_D)) {
-			player.move(Direction.EAST);
-		}
-		if(keyboard.keyPressedOnce(KeyEvent.VK_SPACE)) {
-			player.infect(units);
+		if(player.alive) {
+			if(keyboard.keyPressed(KeyEvent.VK_W)) {
+				player.move(Direction.NORTH);
+			}
+			if(keyboard.keyPressed(KeyEvent.VK_A)) {
+				player.move(Direction.WEST);
+			}
+			if(keyboard.keyPressed(KeyEvent.VK_S)) {
+				player.move(Direction.SOUTH);
+			}
+			if(keyboard.keyPressed(KeyEvent.VK_D)) {
+				player.move(Direction.EAST);
+			}
+			if(keyboard.keyPressedOnce(KeyEvent.VK_SPACE)) {
+				player.infect(units);
+			}
+			if(keyboard.keyPressed(KeyEvent.VK_E)) {
+				player.rally(true);
+			} else if(keyboard.keyReleased(KeyEvent.VK_E)) {
+				player.rally(false);
+			}
 		}
 		if(keyboard.keyPressedOnce(KeyEvent.VK_1)) {
 			GameUnit u = new GameUnit(GameUnit.Faction.ALLY);
@@ -175,11 +182,6 @@ public class Game extends JPanel implements Runnable {
 		}
 		if(keyboard.keyPressedOnce(KeyEvent.VK_R)) {
 			restart();
-		}
-		if(keyboard.keyPressed(KeyEvent.VK_E)) {
-			player.rally(true);
-		} else if(keyboard.keyReleased(KeyEvent.VK_E)) {
-			player.rally(false);
 		}
 		
 		HashSet<GameEntity> dead = new HashSet<>();

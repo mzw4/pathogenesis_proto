@@ -1,8 +1,11 @@
 import java.awt.Color;
 import java.awt.Graphics2D;
 
+import org.newdawn.slick.util.pathfinding.PathFindingContext;
+import org.newdawn.slick.util.pathfinding.TileBasedMap;
 
-public class Map {
+
+public class Map implements TileBasedMap {
 	public static final int TILE_SIZE = 20;
 	
 	private int width, height;
@@ -26,7 +29,34 @@ public class Map {
 				map[(y-GameUnit.SIZE/2)/TILE_SIZE][(x-GameUnit.SIZE/2)/TILE_SIZE] != 1 &&
 				map[(y+GameUnit.SIZE/2)/TILE_SIZE][(x+GameUnit.SIZE/2)/TILE_SIZE] != 1;
 	}
+
+	// --------------------------------- Pathfindiing -----------------------------------
+
+	@Override
+	public boolean blocked(PathFindingContext context, int x, int y) {
+		return map[y][x] == 1;
+	}
+
+	@Override
+	public float getCost(PathFindingContext context, int x, int y) {
+		return 1f;
+	}
+
+	@Override
+	public int getHeightInTiles() {
+		return height;
+	}
+
+	@Override
+	public int getWidthInTiles() {
+		return width;
+	}
+
+	@Override
+	public void pathFinderVisited(int x, int y) {}
 	
+	// --------------------------------- Getters and Setters -----------------------------------
+
 	public int getTileAt(int x, int y) {
 		return map[y][x];
 	}
@@ -39,6 +69,8 @@ public class Map {
 		return height;
 	}
 	
+	// --------------------------------- Draw -----------------------------------
+
 	public void draw(Graphics2D g2d, GameUnit following, float delta) {
 		g2d.setColor(Color.black);
 		
