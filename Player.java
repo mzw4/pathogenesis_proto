@@ -121,6 +121,7 @@ public class Player extends GameUnit {
 		super.draw(g2d, delta);
 		
 		if(infect) {
+			g2d.setColor(Color.white);
 			if(infect_success) {
 				g2d.drawString("CONVERTED!", infectx - INFECT_RANGE, infecty - INFECT_RANGE);
 			}

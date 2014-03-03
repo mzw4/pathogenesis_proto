@@ -6,7 +6,6 @@ import java.util.TimerTask;
 
 public class GameUnit extends GameEntity {	
 	public static int SIZE = 20;
-	
 	protected int ATTACK_RANGE = 50;
 	protected int CHASE_RANGE = 200;
 	protected int ATTACK_COOLDOWN = 20;
@@ -189,7 +188,7 @@ public class GameUnit extends GameEntity {
 		g2d.setColor(Color.green);
 		g2d.fillRect(screen_x-10, screen_y -10, 45 * health/MAX_HEALTH, 5);
 
-		g2d.setColor(Color.black);
+		g2d.setColor(Color.white);
 		if(faction != Faction.PLAYER) {
 			g2d.drawString("Target: " + targetX + ", " + targetY, 500, 20);
 			g2d.drawString("Vel: " + velx + ", " + vely, 500, 50);
