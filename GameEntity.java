@@ -1,8 +1,11 @@
+import java.awt.image.BufferedImage;
+
 
 public class GameEntity {
 	protected int x, y;
 	protected int screen_x, screen_y;
 	protected boolean alive;
+	protected BufferedImage image;
 
 	public GameEntity() {
 		alive = true;
@@ -11,6 +14,10 @@ public class GameEntity {
 	public void placeAt(int x, int y) {
 		this.x = x;
 		this.y = y;
+	}
+	
+	public void setImage(BufferedImage image) {
+		this.image = image;
 	}
 	
 	public boolean inRange(GameEntity other, int range) {

@@ -1,5 +1,6 @@
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.util.HashSet;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -25,8 +26,8 @@ public class Player extends GameUnit {
 	private int plasmids;
 	private int allies;
 	
-	public Player(Faction faction) {
-		super(faction);
+	public Player(BufferedImage image, Faction faction) {
+		super(image, faction);
 		timer = new Timer();
 		plasmids = INITIAL_PLASMIDS;
 	}
@@ -121,13 +122,6 @@ public class Player extends GameUnit {
 		super.draw(g2d, delta);
 		
 		if(infect) {
-			g2d.setColor(Color.white);
-			if(infect_success) {
-				g2d.drawString("CONVERTED!", infectx - INFECT_RANGE, infecty - INFECT_RANGE);
-			}
-			if(max_allies) {
-				g2d.drawString("MAX ALLIES!", infectx - INFECT_RANGE, infecty - INFECT_RANGE);
-			}
 			g2d.setColor(new Color(250, 200, 200, infectFade));
 			
 			int screen_x = infectx - (x - GUI.getW()/2) + 
@@ -135,7 +129,14 @@ public class Player extends GameUnit {
 			int	screen_y = infecty - (y - GUI.getH()/2) +
 					(int)(vely * (1-delta));
 			g2d.fillOval(screen_x - INFECT_RANGE, screen_y - INFECT_RANGE, INFECT_RANGE*2, INFECT_RANGE*2);
+			
+			g2d.setColor(Color.white);
+			if(infect_success) {
+				g2d.drawString("CONVERTED!", screen_x - INFECT_RANGE, screen_y - INFECT_RANGE);
+			}
+			if(max_allies) {
+				g2d.drawString("MAX ALLIES!", screen_x - INFECT_RANGE, screen_y - INFECT_RANGE);
+			}
 		}
-
 	}
 }

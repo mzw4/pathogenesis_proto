@@ -4,8 +4,10 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.awt.image.BufferedImage;
-import java.awt.image.TileObserver;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
@@ -30,9 +32,19 @@ public class Game extends JPanel implements Runnable {
 
 	private float interpolation;
 	private KeyInputHandler keyboard;
-	private BufferedImage background;
-	private final String background_path = "src/red_blood_cells.jpg";
 	
+	// Image stuff
+	//private final String background_path = "src/images/bckgrnd.png";
+	private final String background_path = "src/images/background_long.png";
+
+	private BufferedImage background;
+	private final String char_path = "src/images/mainplayer.png";
+	private BufferedImage char_image;
+	private final String char2_path = "src/images/pose.png";
+	private BufferedImage char2_image;
+	private final String enemy_path = "src/images/enemy.png";
+	private BufferedImage enemy_image;
+
 	private GameUnit following;	// the entity that the camera is following
 	private Map map;
 	
@@ -71,26 +83,43 @@ public class Game extends JPanel implements Runnable {
 		pickups.clear();
 		kills = 0;
 		
-		// create player
-		player = new Player(GameUnit.Faction.PLAYER);
-		player.placeAt(sWidth/2, sHeight/2);
-		units.add(player);
-		following = player;
-		
-		// create map
-		map = new Map(96, 54);
-		// populate map
-		map.generate();
-		
 		// load images
 		try {
 		    background = ImageIO.read(new File(background_path));
+		    char_image = ImageIO.read(new File(char_path));
+		    char2_image = ImageIO.read(new File(char2_path));
+		    enemy_image = ImageIO.read(new File(enemy_path));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		
+		// create player
+		player = new Player(char_image, GameUnit.Faction.PLAYER);
+		player.placeAt(40, 40);
+		player.setImage(char_image);
+		units.add(player);
+		following = player;
+		
+		// create map
+		map = new Map(100, 50);
+		// populate map
+		map.generate();
+		
 	    keyboard = new KeyInputHandler();
 	    addKeyListener(keyboard);
+	    
+		addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				handleMousePress(e);
+			}
+		});
+		addMouseMotionListener(new MouseMotionAdapter() {
+			@Override
+			public void mouseDragged(MouseEvent e) {
+				handleMousePress(e);
+			}
+		});
 	    
 	    setKeyBindings();
 	}
@@ -136,6 +165,25 @@ public class Game extends JPanel implements Runnable {
 		repaint();
 	}
 	
+	private void placeUnit(GameUnit u, GameUnit.Faction faction) {
+		if(faction == GameUnit.Faction.ALLY) {
+			int x = (int)(player.getX() + Math.random() * 20 - 10);
+			int y = (int) (player.getY() + Math.random() * 20 - 10);
+			if(map.canMoveTo(x, y)) {
+				u.placeAt(x, y);
+				player.addAlly();
+				units.add(u);
+			}
+		} else if(faction == GameUnit.Faction.ENEMY) {
+			int x = (int)(Math.random() * map.getWidth()*Map.TILE_SIZE);
+			int y = (int)(Math.random() * map.getHeight()*Map.TILE_SIZE);
+			if(map.canMoveTo(x, y)) {
+				u.placeAt(x, y);
+				units.add(u);
+			}
+		}
+	}
+	
 	private void update() {
 		keyboard.update();
 
@@ -163,17 +211,12 @@ public class Game extends JPanel implements Runnable {
 			}
 		}
 		if(keyboard.keyPressedOnce(KeyEvent.VK_1)) {
-			GameUnit u = new GameUnit(GameUnit.Faction.ALLY);
-			u.placeAt((int)(player.getX() + Math.random() * 20 - 10),
-					(int) (player.getY() + Math.random() * 20 - 10));
-			units.add(u);
-			player.addAlly();
+			GameUnit u = new GameUnit(char2_image, GameUnit.Faction.ALLY);
+			placeUnit(u, GameUnit.Faction.ALLY);
 		}	
 		if(keyboard.keyPressedOnce(KeyEvent.VK_2) || Math.random() < ENEMY_SPAWN_CHANCE) {
-			GameUnit u = new GameUnit(GameUnit.Faction.ENEMY);
-			u.placeAt((int)(Math.random() * map.getWidth()*Map.TILE_SIZE),
-					(int)(Math.random() * map.getHeight()*Map.TILE_SIZE));
-			units.add(u);
+			GameUnit u = new GameUnit(enemy_image, GameUnit.Faction.ENEMY);
+			placeUnit(u, GameUnit.Faction.ENEMY);
 		}		
 		if(keyboard.keyPressedOnce(KeyEvent.VK_3) || Math.random() < PLASMID_SPAWN_CHANCE) {
 			placePickup(Pickup.Type.PLASMID,
@@ -225,6 +268,12 @@ public class Game extends JPanel implements Runnable {
 	
 	private void setKeyBindings() {
 		getInputMap().put(KeyStroke.getKeyStroke("A"), "press");
+	}
+	
+	private void handleMousePress(MouseEvent e) {
+		int x = e.getX()+(following.x - sWidth/2);
+		int y = e.getY()+(following.y - sHeight/2);
+		map.setAsWall(x/Map.TILE_SIZE, y/Map.TILE_SIZE);
 	}
 	
 	public void paintComponent(Graphics g) {
